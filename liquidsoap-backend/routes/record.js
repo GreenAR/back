@@ -25,10 +25,6 @@ router.get('/recorded/:domain', function(req, res, next) {
 		
    res.json(episodes);
 });
-
-
-
-
 router.get('/recorded/:domain/:file', function(req, res, next) {
 
     let domain = req.params['domain'];

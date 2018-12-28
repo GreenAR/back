@@ -2,10 +2,12 @@ var express = require('express');
 var router = express.Router();
 var fs = require('fs');
 var shell = require('shelljs');
+var Telnet = require('telnet-client')
 
 
 /* GET home page. */
 router.post('/start', function(req, res, next) {
+    var telnet_port      = req.body.telnet_port;
     var harbor_port      = req.body.harbor_port;
     var harbor_password  = req.body.harbor_password;
     var icecast_host     = req.body.icecast_host;
@@ -29,6 +31,7 @@ router.post('/start', function(req, res, next) {
             return console.log(err);
         }
         var result = data.replace(/harbor_port/g,      harbor_port);
+        result = result.replace  (/telnet_port/g,      telnet_port);
         result = result.replace  (/harbor_password/g,  harbor_password);
         result = result.replace  (/icecast_host/g,     icecast_host);
         result = result.replace  (/icecast_port/g,     icecast_port);
@@ -54,5 +57,24 @@ router.post('/start', function(req, res, next) {
 
 
 });
+
+router.post('/change/playlist', async function (req, res, next) {
+    var mount            = req.body.mount;
+    var playlist      = req.body.playlist;
+    var telnet_port      = req.body.telnet_port;
+    var connection = new Telnet();
+    var params = {
+        host: '127.0.0.1',
+        port: telnet_port,
+        shellPrompt: '/ # ',
+        timeout: 1500
+    };
+    await connection.connect(params);
+    await connection.exec('default(dot)pls.uri '+playlist);
+    await connection.exec(mount+'.skip');
+    res.end();
+});
+
+
 
 module.exports = router;
